@@ -1,0 +1,5 @@
+node_modules
+.env
+orginal.txt
+package-lock.json
+password.txt
