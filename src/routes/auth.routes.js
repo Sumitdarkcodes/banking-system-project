@@ -1,10 +1,19 @@
-const express = require ("express") ;        //import express
-const authController = require("../controllers/auth.controller");    //import authcontroller for logic
+const express = require("express");
+const authController = require("../controllers/auth.controller");
+const authMiddleware = require("../middleware/auth.middleware");  // for profile route
 
 const router = express.Router();
 
-router.post("/register",authController.userRegisterController )     //post :- api/auth/register
+// POST /api/auth/register - create new user
+router.post("/register", authController.userRegisterController);
 
- router.post("/login",authController.userLoginController)        //post :- api/auth/login              
+// POST /api/auth/login - login existing user
+router.post("/login", authController.userLoginController);
 
-module.exports = router ; 
+// GET /api/auth/profile - get logged-in user
+router.get("/profile", authMiddleware.authMiddleware, authController.getProfileController);
+
+// POST /api/auth/logout - clear cookie
+router.post("/logout", authController.logoutController);
+
+module.exports = router;

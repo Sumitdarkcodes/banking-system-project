@@ -1,0 +1,114 @@
+/* =========================
+   TOP NAVBAR
+========================= */
+
+.navbar {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);   /* indigo gradient */
+    color: #ffffff;
+    padding: 16px 24px;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+.navbarContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* =========================
+   LOGO
+========================= */
+
+.navbarLogo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+
+/* =========================
+   LINKS
+========================= */
+
+.navbarLinks {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.navbarLink {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background var(--transition);
+}
+
+.navbarLink:hover {
+    background: rgba(255, 255, 255, 0.15);                           /* subtle hover */
+}
+
+.navbarLink.primary {
+    background: #ffffff;                                             /* white pill */
+    color: #4f46e5;
+}
+
+.navbarLink.primary:hover {
+    background: #f0f0ff;
+}
+
+
+/* =========================
+   USER INFO
+========================= */
+
+.navbarUser {
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.navbarLogoutButton {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);                            /* glass look */
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.navbarLogoutButton:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 600px) {
+    .navbarLinks {
+        gap: 8px;
+    }
+
+    .navbarLink span,
+    .navbarLogoutButton span {
+        display: none;                                               /* hide text, show icon */
+    }
+
+    .navbarUser {
+        display: none;
+    }
+}

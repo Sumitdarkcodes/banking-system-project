@@ -1,34 +1,43 @@
-const express = require ('express');                   //express package is imported
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
 
-const authRouter = require ("./routes/auth.routes");  //import authRouter
+const authRouter = require("./routes/auth.routes");              // auth endpoints
+const accountRouter = require("./routes/account.routes");        // account endpoints
+const transactionRoutes = require("./routes/transaction.routes"); // transaction endpoints
 
-const cookieParser = require ("cookie-parser");      //import cookie-parser
+const app = express();
 
-const accountRouter = require ("./routes/account.routes")      //import account router 
+// security headers
+app.use(helmet());
 
-const transactionRoutes = require("./routes/transaction.routes");   // import transaction routes
+// log requests
+app.use(morgan("dev"));
 
-const app = express();                              //server instance is created                      
+// allow requests from frontend (local + deployed)
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.CLIENT_URL
+];
 
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
 
+app.use(express.json());                                         // parse JSON body
+app.use(cookieParser());                                         // parse cookies
 
-app.use (express.json());                          // this middleware use for reading (req.body) data 
+// routes
+app.use("/api/auth", authRouter);
+app.use("/api/accounts", accountRouter);
+app.use("/api/transactions", transactionRoutes);
 
-app.use (cookieParser());                          // using cookie parser
+// 404 handler - unknown routes
+app.use((req, res) => {
+    res.status(404).json({ message: "Route not found" });
+});
 
-
-
-
-
-
-app.use ("/api/auth",authRouter);                //authrouter in use
-
-app.use ("/api/accounts",accountRouter) ;         // account router in use
-
-
-
-
-app.use ("/api/transactions",transactionRoutes)    // transaction routes in use 
-
-
-module.exports = app;                            //exporting app 
+module.exports = app;

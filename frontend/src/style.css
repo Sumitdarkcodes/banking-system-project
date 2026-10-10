@@ -1,0 +1,14 @@
+/* GLOBAL */
+@import "./styles/global.css";
+
+/* NAVBAR */
+@import "./styles/navbar.css";
+
+/* AUTH PAGES */
+@import "./styles/auth.css";
+
+/* DASHBOARD */
+@import "./styles/dashboard.css";
+
+/* TRANSFER */
+@import "./styles/transfer.css";

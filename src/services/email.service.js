@@ -1,80 +1,98 @@
-require('dotenv').config();
-const nodemailer = require('nodemailer');
+require("dotenv").config();                                              // loads .env
 
-// for communicating with google server   transporter is created 
+const nodemailer = require("nodemailer");                                // email library
 
-const transporter = nodemailer.createTransport({      
-  service: 'gmail',
-  auth: {                            // on the basics of these properties
-    type: 'OAuth2',
-    user: process.env.EMAIL_USER,        
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    refreshToken: process.env.REFRESH_TOKEN,
-  },
+// create transporter to talk to Gmail
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        type: "OAuth2",                                                  // OAuth login
+        user: process.env.EMAIL_USER,                                    // sender email
+        clientId: process.env.CLIENT_ID,                                 // from Google Cloud
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN
+    }
 });
 
-// Verify the connection configuration
+// check if email config works on startup
 transporter.verify((error, success) => {
-  if (error) {
-    console.error('Error connecting to email server:', error);
-  } else {
-    console.log('Email server is ready to send messages');
-  }
+    if (error) {
+        console.log("Email server error:", error.message);
+    } else {
+        console.log("Email server is ready");
+    }
 });
 
-// Function to send email
-const sendEmail = async (to, subject, text, html) => {
-  try {
-    const info = await transporter.sendMail({
-      from: `"backend-ledger" <${process.env.EMAIL_USER}>`,      // sender address
-      to,                                                       // list of receivers
-      subject,                                                 // Subject line
-      text,                                                   // plain text body
-      html,                                                  // html body
-    });
+// base function - sends any email
+async function sendEmail(to, subject, text, html) {
+    try {
+        const info = await transporter.sendMail({
+            from: `"Backend Ledger" <${process.env.EMAIL_USER}>`,        // sender name + email
+            to: to,                                                      // recipient
+            subject: subject,                                            // subject line
+            text: text,                                                  // plain text version
+            html: html                                                   // html version
+        });
 
-    console.log('Message sent: %s', info.messageId);
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-  } catch (error) {
-    console.error('Error sending email:', error);
-  }
+        console.log("Email sent:", info.messageId);
+    } catch (error) {
+        console.log("Error sending email:", error.message);              // don't crash on email fail
+    }
+}
+
+// send welcome email after registration
+async function sendRegistrationEmail(userEmail, name) {
+    const subject = "Welcome to Backend Ledger!";
+
+    const text = `Hello ${name},\n\n` +
+                 `Thank you for registering at Backend Ledger. ` +
+                 `We are excited to have you on board!\n\n` +
+                 `Best regards,\nThe Backend Ledger Team`;
+
+    const html = `<p>Hello ${name},</p>` +
+                 `<p>Thank you for registering at Backend Ledger.</p>` +
+                 `<p>Best regards,<br>The Backend Ledger Team</p>`;
+
+    await sendEmail(userEmail, subject, text, html);                     // call base function
+}
+
+// send email after successful transfer
+async function sendTransactionEmail(userEmail, name, amount, toAccount, fromAccount) {
+    const subject = "Transaction Successful";
+
+    const text = `Hello ${name},\n\n` +
+                 `Your transaction of ${amount} from account ${fromAccount} ` +
+                 `to account ${toAccount} was successful.\n\n` +
+                 `Best regards,\nThe Backend Ledger Team`;
+
+    const html = `<p>Hello ${name},</p>` +
+                 `<p>Your transaction of <b>${amount}</b> from account ` +
+                 `<b>${fromAccount}</b> to account <b>${toAccount}</b> was successful.</p>` +
+                 `<p>Best regards,<br>The Backend Ledger Team</p>`;
+
+    await sendEmail(userEmail, subject, text, html);
+}
+
+// send email when a transaction fails
+async function sendTransactionFailureEmail(userEmail, name, amount, toAccount) {
+    const subject = "Transaction Failed";
+
+    const text = `Hello ${name},\n\n` +
+                 `Your transaction of ${amount} to account ${toAccount} failed.\n` +
+                 `Please try again or contact support.\n\n` +
+                 `Best regards,\nThe Backend Ledger Team`;
+
+    const html = `<p>Hello ${name},</p>` +
+                 `<p>Your transaction of <b>${amount}</b> to account ` +
+                 `<b>${toAccount}</b> failed.</p>` +
+                 `<p>Please try again or contact support.</p>` +
+                 `<p>Best regards,<br>The Backend Ledger Team</p>`;
+
+    await sendEmail(userEmail, subject, text, html);
+}
+
+module.exports = {
+    sendRegistrationEmail,
+    sendTransactionEmail,
+    sendTransactionFailureEmail
 };
-
-async function sendRegistrationEmail(userEmail,name){
-
-    const subject  = "welcome to backend-ledger!";
-    const text = `Hello ${name},\n\n Thank you for registering at backend-ledger.
-                We're  exicted to have you on board! \n\n Best regards, \n The Backend ledger Team `;
-
-    const html =`<p> Hello ${name},</p> <p>Thank you for registering at Backend-ledger </p>`          
-
-    await sendEmail(userEmail, subject, text, html) ;
-
-}
-
-async function sendTransactionEmail(userEmail,name,amount,toAccount) {
-
- const subject = 'Transaction Successfull';
- const text =`Hello ${name}, \n\n Your transaction of $${amount} to account ${toAccount} was sucessfull. \n\n\ Best regards ,\n The Backend Team`;
-
- const html =`<p>Hello ${name},</p><p> Your transaction of $${amount} to account ${toAccount}. \n\n\ Best regards ,\n The Backend Team`; 
-
- await sendEmail ( userEmail, subject, text, html) ; 
-}
-
-async function sendTransactionfailureEmail(userEmail,name,amount,toAccount) {
-
- const subject = 'Transaction failed';
- const text =`Hello ${name}, \n\n Your transaction of $${amount} to account ${toAccount} was failed . \n\n\ Best regards ,\n The Backend Team`;
-
- const html =`<p>Hello ${name},</p><p> Your transaction of $${amount} to account ${toAccount}. \n\n\ Best regards ,\n The Backend Team`; 
-
- await sendEmail ( userEmail, subject, text, html) ; 
-}
-
-
-
-module.exports = {sendRegistrationEmail,
-                  sendTransactionEmail,
-                  sendTransactionfailureEmail  } ;

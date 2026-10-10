@@ -1,21 +1,16 @@
-const express = require ("express");              //import express
+const express = require("express");
+const authMiddleware = require("../middleware/auth.middleware");
+const accountController = require("../controllers/account.controller");
 
-const authMiddleware = require ("../middleware/auth.middleware")     //import auth middle ware
+const router = express.Router();
 
-const accountController = require ("../controllers/account.controller")
+// POST /api/accounts - create account for logged-in user
+router.post("/", authMiddleware.authMiddleware, accountController.createAccountController);
 
-const router = express.Router() ;
+// GET /api/accounts - get all accounts of logged-in user
+router.get("/", authMiddleware.authMiddleware, accountController.getUserAccountsController);
 
+// GET /api/accounts/balance/:accountId - get balance of one account
+router.get("/balance/:accountId", authMiddleware.authMiddleware, accountController.getAccountBalanceController);
 
-router.post ("/",authMiddleware.authMiddleware,accountController.createAccountController)
-
-
-
-//this api fetch all user accounts 
-router.get("/",authMiddleware.authMiddleware,accountController.getUserAccountsController)
-
-
-router.get("/balance/:accountId", authMiddleware.authMiddleware,accountController.getAccountBalanceController)
-
-
-module.exports = router ;
+module.exports = router;

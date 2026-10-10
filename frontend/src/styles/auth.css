@@ -1,0 +1,113 @@
+/* =========================
+   AUTH PAGES (login + register)
+========================= */
+
+.authPage {
+    min-height: calc(100vh - 72px);                                  /* full screen minus navbar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #eef2ff 0%, #fef3c7 100%);   /* indigo → gold */
+}
+
+.authCard {
+    width: 100%;
+    max-width: 440px;
+    background: var(--surface);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+}
+
+
+/* =========================
+   AUTH HEADER
+========================= */
+
+.authHeader {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.authIcon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 16px;                                             /* centered */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);           /* gradient circle */
+    color: #ffffff;
+    border-radius: 50%;
+}
+
+.authHeader h1 {
+    margin-bottom: 6px;
+    font-size: 28px;
+}
+
+.authHeader p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+
+/* =========================
+   AUTH FORM
+========================= */
+
+.authForm {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.formGroup label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.authButton {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);           /* gradient button */
+    color: #ffffff;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+.authButton:hover:not(:disabled) {
+    transform: translateY(-1px);                                     /* slight lift */
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+}
+
+
+/* =========================
+   AUTH FOOTER
+========================= */
+
+.authFooter {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.authFooter a {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.authFooter a:hover {
+    text-decoration: underline;
+}

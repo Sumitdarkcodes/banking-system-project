@@ -1,110 +1,77 @@
-const userModel = require ("../models/user.model")
+const userModel = require("../models/user.model");
+const jwt = require("jsonwebtoken");
 
-const jwt = require ("jsonwebtoken")
+// check if user is logged in
+async function authMiddleware(req, res, next) {
 
-async function authMiddleware (req, res, next)        // check token present in cookie or header
- {
-    const token = req.cookies.token || req.headers.authorization?.split (" ") [1];
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];   // cookie or header
 
-    if(!token)
-    {
-        return res.status (401).json ({
-            message : "unauthorzied access , token is missing "       //if token is not found 
-        })
+    if (!token) {                                                                  // no token = not logged in
+        return res.status(401).json({
+            message: "Authentication required"
+        });
     }
 
     try {
-        const decoded = jwt.verify(token,process.env.JWT_SECRET)    // token verify
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);                 // check token is valid
 
-        const user = await userModel.findById (decoded.userId)     // find by user_id in data base  
+        const user = await userModel.findById(decoded.userId);                     // find user in DB
 
-        req.user = user;                                        // set in req.user
-        return next ()  
-    }
-    catch (err)                                              //token is not same 
-    {
-        return res.status (401).json
-        ({
+        if (!user) {                                                               // user might be deleted
+            return res.status(401).json({
+                message: "User no longer exists"
+            });
+        }
 
-            message : "unauthrozied acess,token is invalid"    
-        })
+        req.user = user;                                                           // save for next routes
+
+        return next();                                                             // go to next middleware
+
+    } catch (err) {                                                                // token is bad or expired
+        return res.status(401).json({
+            message: "Invalid or expired token"
+        });
     }
 }
 
-async function authSystemUserMiddleware (req , res, next)      // another middleware for system User
-{
+// check if user is a system user (admin)
+async function authSystemUserMiddleware(req, res, next) {
 
-      console.log("1 - Middleware started")
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];   // cookie or header
 
-    const token = req.cookies.token || req.headers.authorization?.split(" ")[1]
-
-     console.log("2 - Token:", !!token)
-
-
-    if (!token){
-
-         console.log("3 - No token")
-
-
-            return res.status (401).json({
-                message :"unauthorized access,token is missing "
-            }) ;
-        }
-
-       try {
-
-
-        console.log("4 - Before JWT")
-
-
-        const decoded = jwt.verify (token,process.env.JWT_SECRET)
-
-
-        console.log("5 - JWT verified")
-
-        const user = await userModel.findById (decoded.userId).select("+systemUser")
-
-       
-             console.log("6 - User found")
-
-             console.log("USER ID:", user._id)
-            console.log("USER EMAIL:", user.email)
-            console.log("SYSTEM USER:", user.systemUser)
-
-
-        if (!user.systemUser){
-
-            console.log("7 - Not system user")
-
-
-            return res.status (403).json
-            ({
-                messsage :"forbidden access ,not a sysytem user"
-            })
-        }
-
-        req.user = user
-
-          console.log("8 - Calling next")
-
-
-        return next ();
-       }
-
-  catch (err)
-  {
-
-     console.log("AUTH ERROR:", err)
-
-    return res.status (401).json
-    ({
-        message : "unauthorized acess, token is invalid"
-    })
-  }
-
-
+    if (!token) {                                                                  // no token = not logged in
+        return res.status(401).json({
+            message: "Authentication required"
+        });
     }
 
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);              // check token is valid
 
+        // systemUser is hidden by default so we ask for it explicitly
+        const user = await userModel.findById(decoded.userId).select("+systemUser");
 
-module.exports = {authMiddleware,authSystemUserMiddleware} 
+        if (!user) {                                                             // user might be deleted
+            return res.status(401).json({
+                message: "User no longer exists"
+            });
+        }
+
+        if (!user.systemUser) {                                                   // not an admin
+            return res.status(403).json({
+                message: "Access denied - system users only"
+            });
+        }
+
+        req.user = user;                                                          // save for next routes
+
+        return next();                                                           // go to next middleware
+
+    } catch (err) {                                                            // token is bad or expired
+        return res.status(401).json({
+            message: "Invalid or expired token"
+        });
+    }
+}
+
+module.exports = { authMiddleware, authSystemUserMiddleware };

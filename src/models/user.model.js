@@ -1,62 +1,58 @@
-const mongoose = require ("mongoose");              //import mongoose
+const mongoose = require("mongoose");                    // mongo library
+const bcrypt = require("bcryptjs");                      // password hashing
 
-const bcrypt = require("bcryptjs")                 // import bcryptjs
+const userSchema = new mongoose.Schema({
 
-const userSchema = new mongoose.Schema ({             //Schema is created + their properties(condition)
+    email: {
+        type: String,
+        required: [true, "Email is required"],           // [condition, error message]
+        unique: true,                                    // no duplicate emails
+        trim: true,                                      // remove extra spaces
+        lowercase: true,                                 // store as lowercase
+        match: [
+            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+            "Invalid email address"                      // regex validation
+        ]
+    },
 
-    email : {
-        type : String,
-        required : ["true","Email is required for creating new user"],
-        unique  : ["true","Email is already Exists"],
-        trime   : true,
-        lowercase : true,
-        match : [/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/ ,"Invalid email address"]  //regex  
-           },
+    name: {
+        type: String,
+        required: [true, "Name is required"]
+    },
 
-     name : {
-        type : String,
-        required : [true,"Name is required"]    
-            },
-       
-     password : {
-        type : String,
-        required : [true,"password is required"],
-        minlength : [6,"min 6 character is required"],
-        select : false                                    //password is not fetch in general user query 
-           },
-     systemUser : {
-        type : Boolean,
-        default : false,
-        immutable : true ,
-        select : false ,
+    password: {
+        type: String,
+        required: [true, "Password is required"],
+        select: false                                    // never returned by default
+        // note: minlength check belongs in the controller
+        // (here it would check the hash, not the real password)
+    },
 
-     },      
-                  
+    systemUser: {
+        type: Boolean,
+        default: false,
+        immutable: true,                                 // can't be changed after creation
+        select: false                                    // hidden by default
+    }
+
 }, {
-         timestamps :true      // we get account creation & account data updation timestamps 
-           }) 
-
-
-                               //before saving data this async function run
-userSchema.pre("save", async function (next)      // in this function if passowrd is updated then 
-                                                       
- {
-     if (!this.isModified ("password"))            
-     {
-        return ;
-     }
-     const hash = await bcrypt.hash (this.password,10)    // converted into hash otherwise return
-
-     this.password =hash;
-     return ;             
-          
+    timestamps: true                                     // adds createdAt + updatedAt
 });
 
-userSchema.methods.comparePassword = async function (password) 
-{
-    return await bcrypt.compare (password , this.password)
-}
+// hash password before saving (only if changed)
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) {
+        return;                                          // password not changed - skip
+    }
+    const hash = await bcrypt.hash(this.password, 10);   // hash with 10 rounds
+    this.password = hash;
+});
 
-const userModel = mongoose.model("user",userSchema)
+// helper method to compare plain password with hash
+userSchema.methods.comparePassword = async function (password) {
+    return await bcrypt.compare(password, this.password);
+};
+
+const userModel = mongoose.model("user", userSchema);
 
 module.exports = userModel;

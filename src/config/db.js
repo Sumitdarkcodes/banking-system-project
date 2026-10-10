@@ -1,24 +1,17 @@
-const mongoose = require("mongoose");                            //imported the mongoosedb
+const mongoose = require("mongoose");                    // mongo connection library
 
-
-
-
-function connectToDB(){                                          //function to connect db
-
-    mongoose.connect (process.env.MONGO_URI)
-
-    .then (()=> {
-
-          console.log("server is now connected to DB");
-    })
-    .catch (err =>{                                               //if error occur
-          console.log ("error in connected to DB",err.message)         
-          process.exit(1);                                       // if server is not connected to
-                                                                // DB then server stop here 
-    })
+// function to connect to MongoDB
+function connectToDB() {
+    // return the promise so server.js can wait for it
+    return mongoose
+        .connect(process.env.MONGO_URI)
+        .then(() => {
+            console.log("Connected to DB");
+        })
+        .catch((err) => {
+            console.log("Error connecting to DB:", err.message);
+            throw err;                                   // let server.js handle it
+        });
 }
 
 module.exports = connectToDB;
-
-
-

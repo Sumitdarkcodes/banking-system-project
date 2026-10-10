@@ -1,22 +1,18 @@
-const {Router} = require ("express")
+const express = require("express");                                      // express package
 
-const authMiddleware = require ("../middleware/auth.middleware")
+const authMiddleware = require("../middleware/auth.middleware");         // checks login
+const transactionController = require("../controllers/transaction.contoller");  // controller
 
-const transactioncontroller = require ("../controllers/transaction.contoller")
+const router = express.Router();
 
+// POST /api/transactions - transfer money between two accounts
+router.post("/", authMiddleware.authMiddleware, transactionController.CreateTransaction);
 
+// POST /api/transactions/system/initial-funds - add initial funds (admin only)
+router.post(
+    "/system/initial-funds",
+    authMiddleware.authSystemUserMiddleware,
+    transactionController.CreateInitalFundsTransaction
+);
 
-const transactionRoutes = Router();
-
-
-// api/transactions
-// this api create new transaction
-
- transactionRoutes.post ("/",authMiddleware.authMiddleware, transactioncontroller.CreateTransaction)
-
-
-
- transactionRoutes.post ("/system/initial-funds",authMiddleware.authSystemUserMiddleware, transactioncontroller.CreateInitalFundsTransaction)
-
-
-module.exports = transactionRoutes;
+module.exports = router;
